@@ -10,10 +10,19 @@ After a successful installation, the following window appears at the start.
 
 ![Starting](doc/step1.png)
 
-Goto `Resource Explorer` to select the board. The MSP432 board can be connected so that Code Composer Studio can detect it immediately and suggest it.
+Goto `Resource Explorer` to select the board. The MSP432 board can be connected
+so that Code Composer Studio can detect it immediately and suggest it.
 
 ![Ressource Explorer](doc/step2.png)
 
 Install the SDK for the kit used.
 
 ![Install SDK](doc/step3.png)
+
+## Import the exercise
+
+Each subfolders containg the exercise is a project that can be imported in
+the CSS IDE. In `Project Explorer`, right click and select
+`Import > CSS Projects`.
+
+Under the tab `Project`, Use Build and Debug to flash the board.
