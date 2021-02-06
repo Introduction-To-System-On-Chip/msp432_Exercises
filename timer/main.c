@@ -12,25 +12,16 @@ typedef struct {
 
 static void initTimer(void)
 {
-    const Timer_A_ContinuousModeConfig timerConfig =
-    {
-        TIMER_A_CLOCKSOURCE_ACLK,       // ACLK Clock Source
-        TIMER_FREQUENCY_DIVIDER,
-        TIMER_A_TAIE_INTERRUPT_DISABLE, // Disable interrupts
-        TIMER_A_DO_CLEAR                // Clear counter
-    };
-
-    Timer_A_configureContinuousMode(TIMER_A1_BASE, &timerConfig);
-    Timer_A_startCounter(TIMER_A1_BASE, TIMER_A_CONTINUOUS_MODE);
+    /* TODO: Add the code to init the timer */
 }
 
 static currentTime_t getTime(void)
 {
     currentTime_t time;
-    uint16_t value = Timer_A_getCounterValue(TIMER_A1_BASE);
 
-    time.seconds = (value / TIMER_REAL_FREQUENCY);
-    time.milliseconds = ((value * 1000) / TIMER_REAL_FREQUENCY) % 1000;
+    /* TODO: Fill the proper values */
+    time.seconds = 0;
+    time.milliseconds = 0;
 
     return time;
 }
@@ -38,7 +29,7 @@ static currentTime_t getTime(void)
 static void printTime(void)
 {
     currentTime_t time = getTime();
-    lprintf(EUSCI_A0_BASE, "Time: %u.%u\r\n", time.seconds, time.milliseconds);
+    lprintf(EUSCI_A0_BASE, "Time: %us %ums\r\n", time.seconds, time.milliseconds);
 }
 
 static void printTimeDifference(currentTime_t startTime)
@@ -53,30 +44,47 @@ static void printTimeDifference(currentTime_t startTime)
     }
 
     lprintf(EUSCI_A0_BASE,
-            "Time Elapsed: %u.%u\r\n",
+            "Time Elapsed: %us %ums\r\n",
             secondsElapsed,
             millisecondsElapsed);
 }
 
+static void setupButton(void)
+{
+    /* Set Button P1.1 as input */
+    MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN1);
+
+    /* Enable P1 interrupt for Pin1 */
+    MAP_GPIO_clearInterruptFlag(GPIO_PORT_P1, GPIO_PIN1);
+    MAP_GPIO_enableInterrupt(GPIO_PORT_P1, GPIO_PIN1);
+    /* Enable all interrupt of PORT1 */
+    MAP_Interrupt_enableInterrupt(INT_PORT1);
+}
+
 int main(void)
 {
-    /* Stop watchdog timer. */
+    /* Stop watchdog timer. So that it does not impact debugging */
     WDT_A_hold(WDT_A_BASE);
 
-    /* Setting DCO to 12MHz */
-    CS_setDCOCenteredFrequency(CS_DCO_FREQUENCY_12);
-    MAP_CS_initClockSignal(CS_MCLK, CS_REFOCLK_SELECT, CS_CLOCK_DIVIDER_1);
+    /* TODO: Initialize the clock systems */
 
-    MAP_CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);
-
-    setupPrint();
     initTimer();
 
-    lprintf(EUSCI_A0_BASE,
-            "Clocks:\r\n"
-            "\taclkFreq: %uHz\r\n"
-            "\tsmclkFreq: %uHz\r\n",
-            CS_getACLK(), CS_getMCLK());
+    setupPrint();
+    setupButton();
+
+    /*
+     * From the DriverLib User guide: "If the user calls a low power entry
+     *  function that disables a clock source while an active peripheral
+     *  is accessing the clock source, by default MSP432 will not allow
+     *  the transition."
+     *  This is the case of the code, where the timer is accessing the
+     *  clock source.
+     */
+    MAP_PCM_enableRudeMode();
+
+    /* Enabling all interrupts */
+    MAP_Interrupt_enableMaster();
 
     printTime();
 
@@ -90,7 +98,19 @@ int main(void)
         }
 
         printTimeDifference(beforeTime);
+
+        MAP_PCM_gotoLPM3();
     }
 
     return 0;
+}
+
+/* GPIO ISR */
+void PORT1_IRQHandler(void)
+{
+    uint32_t status;
+
+    status = MAP_GPIO_getEnabledInterruptStatus(GPIO_PORT_P1);
+    MAP_GPIO_clearInterruptFlag(GPIO_PORT_P1, status);
+    /* No need to parse which interrupt as only the button is configured */
 }
