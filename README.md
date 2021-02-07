@@ -59,3 +59,9 @@ breakpoint.
 
 In the `Window` tab, go into `Show View` and add Breakpoints, Registers,
 Variables and Dissasembly
+
+### Run solution
+
+In the answer folder, the solution can be found. All source files are excluded
+from the project to avoid any conflicts. To run the answer sources, right click
+on the file name in the IDE and remove the exclude form project.
