@@ -65,3 +65,16 @@ Variables and Dissasembly
 In the answer folder, the solution can be found. All source files are excluded
 from the project to avoid any conflicts. To run the answer sources, right click
 on the file name in the IDE and remove the exclude form project.
+
+### Use a terminal emulator
+
+It is possible to see logs printed out from the MSP432 board. To see them, open
+a terminal emulator like Minicom, Putty or Teraterm and configure it as follow:
+- Baurate 9600
+- No parity
+- LSB first
+- One stop bit
+
+For more detail, fhave a look at the `setupPrint.c` file in each project.
+The function `lprintf` can be used to print logs, even if it has limited
+functionalities.

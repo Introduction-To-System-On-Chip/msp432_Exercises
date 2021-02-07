@@ -2,9 +2,6 @@
 #include <stdint.h>
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
 
-#define TIMER_FREQUENCY_DIVIDER TIMER_A_CLOCKSOURCE_DIVIDER_64
-#define TIMER_REAL_FREQUENCY (CS_getACLK() / TIMER_FREQUENCY_DIVIDER)
-
 typedef struct {
   uint16_t seconds;
   uint16_t milliseconds;
@@ -108,9 +105,6 @@ int main(void)
 /* GPIO ISR */
 void PORT1_IRQHandler(void)
 {
-    uint32_t status;
-
-    status = MAP_GPIO_getEnabledInterruptStatus(GPIO_PORT_P1);
     MAP_GPIO_clearInterruptFlag(GPIO_PORT_P1, status);
     /* No need to parse which interrupt as only the button is configured */
 }
